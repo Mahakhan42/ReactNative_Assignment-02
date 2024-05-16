@@ -1,117 +1,113 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const App = () => {
+  const [todos, setTodos] = useState([]);
+  const [newTodo, setNewTodo] = useState('');
+  const [editIndex, setEditIndex] = useState(null);
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  const addTodo = () => {
+    if (newTodo.trim() !== '') {
+      if (editIndex !== null) {
+        // Editing existing todo
+        const updatedTodos = [...todos];
+        updatedTodos[editIndex] = newTodo;
+        setTodos(updatedTodos);
+        setEditIndex(null);
+      } else {
+        // Adding new todo
+        setTodos([...todos, newTodo]);
+      }
+      setNewTodo('');
+    }
+  };
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  const deleteTodo = (index) => {
+    const updatedTodos = [...todos];
+    updatedTodos.splice(index, 1);
+    setTodos(updatedTodos);
+  };
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const editTodo = (index) => {
+    setNewTodo(todos[index]);
+    setEditIndex(index);
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+    <View style={styles.container}>
+    <Text style={{ fontSize: 25, fontWeight: "bold", color: "#fff", textAlign: "center" ,marginTop:50}}>TODO APP 📝 {"\n\n"}</Text>
+      <TextInput 
+        style={styles.input}
+        placeholder='Enter Your Todo....'
+        value={newTodo}
+        onChangeText={text => setNewTodo(text)}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      <TouchableOpacity onPress={addTodo} style={styles.addButton}>
+        <Text style={styles.buttonText}>{editIndex !== null ? 'Save Todo' : 'Add Todo'}</Text>
+      </TouchableOpacity>
+      <FlatList
+        data={todos}
+        renderItem={({ item, index }) => (
+          <View style={styles.todoItem}>
+            <Text style={styles.todoText}>{item}</Text>
+            <TouchableOpacity onPress={() => deleteTodo(index)}>
+              <Text style={styles.deleteButton}>Delete</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => editTodo(index)}>
+              <Text style={styles.editButton}>Edit</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        keyExtractor={(item, index) => index.toString()}
+      />
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+    padding: 20,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  input: {
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+    marginBottom: 20,
+    paddingVertical: 5,
+    color: '#fff',
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  addButton: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  highlight: {
-    fontWeight: '700',
+  buttonText: {
+    fontSize: 16,
+    color: '#fff',
+  },
+  todoItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+    paddingVertical: 10,
+  },
+  todoText: {
+    fontSize: 16,
+    color: '#fff',
+    flex: 1,
+  },
+  editButton: {
+    color: '#ffa500',
+    marginRight: 10,
+    marginLeft: 10,
+  },
+  deleteButton: {
+    color: 'red',
   },
 });
 
